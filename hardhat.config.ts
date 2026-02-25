@@ -51,6 +51,13 @@ const config: HardhatUserConfig = {
   mocha: {
     timeout: 60000,
   },
+
+  gasReporter: {
+    enabled: process.env.REPORT_GAS === "true",
+    currency: "USD",
+    // outputFile: "gas-report.txt",
+    // noColors: true,
+  },
 };
 
 export default config;

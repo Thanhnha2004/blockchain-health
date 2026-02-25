@@ -345,7 +345,7 @@ describe("End-to-end flow", () => {
 **Deploy script** với `hardhat-deploy`:
 
 ```typescript
-// deploy/01_deploy_all.ts
+// deploy/00_deploy_all.ts
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 
