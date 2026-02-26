@@ -7,7 +7,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "mocha --require ts-node/register --project tsconfig.json test/**/*.test.ts"
   },
   "keywords": [],
   "author": "",
@@ -17,7 +17,8 @@
     "dotenv": "^17.3.1",
     "ethers": "^6.16.0",
     "express": "^5.2.1",
-    "multer": "^2.0.2"
+    "multer": "^2.0.2",
+    "supertest": "^7.2.2"
   },
   "devDependencies": {
     "@types/chai": "^4.3.20",
@@ -25,8 +26,11 @@
     "@types/mocha": "^10.0.10",
     "@types/multer": "^2.0.0",
     "@types/node": "^25.3.0",
+    "@types/sinon": "^21.0.0",
+    "@types/supertest": "^7.2.0",
     "chai": "^4.5.0",
     "mocha": "^10.8.2",
+    "sinon": "^21.0.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   }

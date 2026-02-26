@@ -22,11 +22,11 @@ app.use("/access", accessRouter);
 app.use(
   (
     err: Error,
-    req: express.Request,
+    _req: express.Request,
     res: express.Response,
-    next: express.NextFunction,
+    _next: express.NextFunction,
   ) => {
-    console.error(err.message);
+    console.error("ERROR:", err.message); // thêm dòng này
     res.status(500).json({ error: err.message });
   },
 );

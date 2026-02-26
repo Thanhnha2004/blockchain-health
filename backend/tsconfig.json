@@ -4,9 +4,13 @@
     "module": "CommonJS",
     "moduleResolution": "node",
     "esModuleInterop": true,
-    "strict": true,
+    "strict": false,
     "outDir": "./dist",
     "resolveJsonModule": true,
+    "skipLibCheck": true
   },
-  "include": ["src/**/*", "test/**/*"]
+  "include": ["src/**/*", "test/**/*"],
+  "ts-node": {
+    "transpileOnly": true
+  }
 }
