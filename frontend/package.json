@@ -1,0 +1,33 @@
+{
+  "name": "medical-dapp",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@rainbow-me/rainbowkit": "^2.2.10",
+    "@react-native-async-storage/async-storage": "^1.24.0",
+    "@tanstack/react-query": "^5.90.21",
+    "next": "^15.5.12",
+    "pino-pretty": "^13.1.3",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "viem": "^2.46.3",
+    "wagmi": "^2.19.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "autoprefixer": "^10.4.27",
+    "eslint": "^9",
+    "eslint-config-next": "^15.5.12",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.19",
+    "typescript": "^5"
+  }
+}
