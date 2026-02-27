@@ -510,11 +510,11 @@ const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
 
 ### Tuần 8 — Integration Phase 2
 
-- [ ] Upload file thật → encrypt → IPFS → hash on-chain
-- [ ] Fetch về → verify hash → decrypt → file khớp bản gốc
-- [ ] API test với Supertest
-- [ ] Handle edge cases: file > 100MB, CID không tồn tại, IPFS gateway timeout
-- [ ] Retry logic cho IPFS request
+- [✅] Upload file thật → encrypt → IPFS → hash on-chain
+- [✅] Fetch về → verify hash → decrypt → file khớp bản gốc
+- [✅] API test với Supertest
+- [✅] Handle edge cases: file > 100MB, CID không tồn tại, IPFS gateway timeout
+- [✅] Retry logic cho IPFS request
 
 > **Milestone Phase 2:** End-to-end qua API — upload → lưu chain → fetch → decrypt thành công.
 
