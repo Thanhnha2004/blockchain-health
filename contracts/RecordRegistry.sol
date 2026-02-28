@@ -5,29 +5,28 @@ import "@openzeppelin/contracts/utils/Pausable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./HealthAccessControl.sol";
 import "./AuditLog.sol";
+import "./DIDRegistry.sol";
 
 /**
  * @title RecordRegistry
  * @notice Lưu metadata hồ sơ y tế on-chain, file thực lưu trên IPFS
- * @dev Cross-contract call đến HealthAccessControl để check quyền truy cập
  */
 contract RecordRegistry is Pausable, Ownable {
     HealthAccessControl public accessControl;
     AuditLog public auditLog;
+    DIDRegistry public didRegistry;
 
     struct Record {
         bytes32 patientDID;
-        string ipfsCID; // CID trỏ đến file mã hóa trên IPFS
-        bytes32 dataHash; // SHA-256 của file gốc để verify toàn vẹn
-        string recordType; // "lab" | "imaging" | "prescription" | "note"
+        string ipfsCID;
+        bytes32 dataHash;
+        string recordType;
         address createdBy;
         uint256 createdAt;
     }
 
-    // patientDID => mảng record
     mapping(bytes32 => Record[]) private patientRecords;
 
-    // ─── Events ───────────────────────────────────────────
     event RecordAdded(
         bytes32 indexed patientDID,
         address indexed createdBy,
@@ -35,34 +34,31 @@ contract RecordRegistry is Pausable, Ownable {
         string ipfsCID
     );
 
-    // ─── Errors ───────────────────────────────────────────
     error NoAccess(bytes32 patientDID, address caller);
     error EmptyCID();
     error EmptyRecordType();
     error InvalidDataHash();
 
-    // ─── Modifiers ────────────────────────────────────────
     modifier onlyAuthorized(bytes32 patientDID) {
-        if (!accessControl.hasAccess(patientDID, msg.sender)) {
+        bool isPatient = (didRegistry.getDIDByAddress(msg.sender) ==
+            patientDID);
+        bool hasPerms = accessControl.hasAccess(patientDID, msg.sender);
+        if (!isPatient && !hasPerms) {
             revert NoAccess(patientDID, msg.sender);
         }
         _;
     }
 
-    constructor(address _accessControl, address _auditLog) Ownable(msg.sender) {
+    constructor(
+        address _accessControl,
+        address _auditLog,
+        address _didRegistry
+    ) Ownable(msg.sender) {
         accessControl = HealthAccessControl(_accessControl);
         auditLog = AuditLog(_auditLog);
+        didRegistry = DIDRegistry(_didRegistry);
     }
 
-    // ─── Write functions ──────────────────────────────────
-
-    /**
-     * @notice Thêm hồ sơ y tế mới — chỉ người có quyền truy cập mới gọi được
-     * @param patientDID  DID của bệnh nhân
-     * @param ipfsCID     CID của file mã hóa đã upload lên IPFS
-     * @param dataHash    SHA-256 hash của file gốc (trước khi mã hóa)
-     * @param recordType  Loại hồ sơ: "lab" | "imaging" | "prescription" | "note"
-     */
     function addRecord(
         bytes32 patientDID,
         string calldata ipfsCID,
@@ -84,15 +80,10 @@ contract RecordRegistry is Pausable, Ownable {
             })
         );
 
-        // Ghi audit log — cross-contract call
         auditLog.log(msg.sender, patientDID, "CREATE");
-
         emit RecordAdded(patientDID, msg.sender, recordType, ipfsCID);
     }
 
-    /**
-     * @notice Lấy tất cả hồ sơ của bệnh nhân — chỉ người có quyền mới xem được
-     */
     function getRecords(
         bytes32 patientDID
     ) external view onlyAuthorized(patientDID) returns (Record[] memory) {
@@ -106,24 +97,15 @@ contract RecordRegistry is Pausable, Ownable {
         return patientRecords[patientDID];
     }
 
-    /**
-     * @notice Đếm số hồ sơ của bệnh nhân — chỉ người có quyền
-     */
     function getRecordCount(
         bytes32 patientDID
     ) external view onlyAuthorized(patientDID) returns (uint256) {
         return patientRecords[patientDID].length;
     }
 
-    // ─── Admin functions ──────────────────────────────────
-
-    /**
-     * @notice Tạm dừng contract trong tình huống khẩn cấp
-     */
     function pause() external onlyOwner {
         _pause();
     }
-
     function unpause() external onlyOwner {
         _unpause();
     }

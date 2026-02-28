@@ -2,33 +2,32 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
-  const { deployments, getNamedAccounts } = hre as any;
-  const { deploy } = deployments;
-  const { deployer } = await getNamedAccounts();
-  const { get, execute } = deployments;
+  const { deploy, get, execute } = hre.deployments;
+  const { deployer } = await hre.getNamedAccounts();
 
-  // Lấy địa chỉ các contract đã deploy trước
+  const didRegistry   = await get("DIDRegistry");
   const accessControl = await get("HealthAccessControl");
-  const auditLog = await get("AuditLog");
+  const auditLog      = await get("AuditLog");
 
   const result = await deploy("RecordRegistry", {
     from: deployer,
-    args: [accessControl.address, auditLog.address],
+    args: [accessControl.address, auditLog.address, didRegistry.address],
     log: true,
   });
 
-  // Whitelist RecordRegistry trong AuditLog
-  await execute(
-    "AuditLog",
-    { from: deployer, log: true },
-    "addAuthorizedContract",
-    result.address,
-  );
+  console.log(`RecordRegistry deployed: ${result.address}`);
 
-  console.log(`RecordRegistry whitelisted in AuditLog`);
+  const isAuthorized = await (await hre.ethers.getContractAt("AuditLog", auditLog.address))
+    .authorizedContracts(result.address);
+
+  if (!isAuthorized) {
+    await execute("AuditLog", { from: deployer, log: true }, "addAuthorizedContract", result.address);
+    console.log(`RecordRegistry whitelisted in AuditLog`);
+  } else {
+    console.log(`RecordRegistry already whitelisted, skipping`);
+  }
 };
 
 export default func;
 func.tags = ["RecordRegistry"];
-// Đảm bảo deploy sau AuditLog và HealthAccessControl
-func.dependencies = ["AuditLog", "HealthAccessControl"];
+func.dependencies = ["DIDRegistry", "AuditLog", "HealthAccessControl"];
