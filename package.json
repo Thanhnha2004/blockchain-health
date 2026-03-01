@@ -7,7 +7,9 @@
     "node": "hardhat node",
     "clean": "hardhat clean",
     "size": "hardhat size-contracts",
-    "run:sepolia": "hardhat run --network sepolia"
+    "run:sepolia": "hardhat run --network sepolia",
+    "sync-env": "ts-node scripts/sync-env.ts",
+    "deploy:local": "hardhat deploy --network localhost --reset && npm run sync-env"
   },
   "license": "ISC",
   "devDependencies": {

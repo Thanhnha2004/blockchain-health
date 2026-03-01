@@ -2,14 +2,16 @@ import express from "express";
 import dotenv from "dotenv";
 import recordsRouter from "./routes/records.router";
 import accessRouter from "./routes/access.router";
+import cors from "cors";
 
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT ?? 3000;
+const PORT = process.env.PORT ?? 3001;
 
 // ─── Middleware ───────────────────────────────────────────────────────────────
 
+app.use(cors({ origin: "http://localhost:3000" }));
 app.use(express.json());
 
 // ─── Routes ───────────────────────────────────────────────────────────────────

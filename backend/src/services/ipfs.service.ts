@@ -1,5 +1,7 @@
 import PinataSDK from "@pinata/sdk";
 import { Readable } from "stream";
+import dotenv from "dotenv";
+dotenv.config();
 
 const pinata = new PinataSDK(
   process.env.PINATA_API_KEY!,

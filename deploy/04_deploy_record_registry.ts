@@ -2,12 +2,13 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
-  const { deploy, get, execute } = hre.deployments;
-  const { deployer } = await hre.getNamedAccounts();
+  const { deployments, getNamedAccounts, ethers } = hre as any;
+  const { deploy, get, execute } = deployments;
+  const { deployer } = await getNamedAccounts();
 
-  const didRegistry   = await get("DIDRegistry");
+  const didRegistry = await get("DIDRegistry");
   const accessControl = await get("HealthAccessControl");
-  const auditLog      = await get("AuditLog");
+  const auditLog = await get("AuditLog");
 
   const result = await deploy("RecordRegistry", {
     from: deployer,
@@ -17,11 +18,17 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
   console.log(`RecordRegistry deployed: ${result.address}`);
 
-  const isAuthorized = await (await hre.ethers.getContractAt("AuditLog", auditLog.address))
-    .authorizedContracts(result.address);
+  const isAuthorized = await (
+    await ethers.getContractAt("AuditLog", auditLog.address)
+  ).authorizedContracts(result.address);
 
   if (!isAuthorized) {
-    await execute("AuditLog", { from: deployer, log: true }, "addAuthorizedContract", result.address);
+    await execute(
+      "AuditLog",
+      { from: deployer, log: true },
+      "addAuthorizedContract",
+      result.address,
+    );
     console.log(`RecordRegistry whitelisted in AuditLog`);
   } else {
     console.log(`RecordRegistry already whitelisted, skipping`);
