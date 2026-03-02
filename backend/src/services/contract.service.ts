@@ -5,6 +5,7 @@ import { ethers } from "ethers";
 import RecordRegistryABI from "../../../artifacts/contracts/RecordRegistry.sol/RecordRegistry.json";
 import HealthAccessControlABI from "../../../artifacts/contracts/HealthAccessControl.sol/HealthAccessControl.json";
 import AuditLogABI from "../../../artifacts/contracts/AuditLog.sol/AuditLog.json";
+import DIDRegistryABI from "../../../artifacts/contracts/DIDRegistry.sol/DIDRegistry.json";
 
 const getProvider = () => new ethers.JsonRpcProvider(process.env.RPC_URL);
 const getSigner = () =>
@@ -30,3 +31,9 @@ export const getAuditLog = () =>
     AuditLogABI.abi,
     getProvider(),
   );
+
+  export const getDIDRegistry = () => new ethers.Contract(
+  process.env.DID_REGISTRY_ADDRESS!,
+  DIDRegistryABI.abi,
+  getProvider(),
+);

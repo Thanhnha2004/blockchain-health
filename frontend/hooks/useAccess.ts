@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { useContracts } from "./useContracts";
+import { useToast } from "../components/toast";
 
 export function useAccess() {
   const { contracts } = useContracts();
+  const toast = useToast();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -18,6 +20,7 @@ export function useAccess() {
 
     setLoading(true);
     setError(null);
+    const toastId = toast.pending("Waiting for confirmation...");
 
     try {
       const contract = await contracts.getAccessControl();
@@ -28,8 +31,10 @@ export function useAccess() {
         dataTypes,
       );
       await tx.wait();
+      toast.success("Access granted successfully", toastId);
     } catch (err: any) {
       setError(err.message);
+      toast.error("Failed to grant access", toastId);
       throw err;
     } finally {
       setLoading(false);
@@ -41,13 +46,16 @@ export function useAccess() {
 
     setLoading(true);
     setError(null);
+    const toastId = toast.pending("Waiting for confirmation...");
 
     try {
       const contract = await contracts.getAccessControl();
       const tx = await contract.revokeAccess(patientDID, doctorAddress);
       await tx.wait();
+      toast.success("Access revoked successfully", toastId);
     } catch (err: any) {
       setError(err.message);
+      toast.error("Failed to revoke access", toastId);
       throw err;
     } finally {
       setLoading(false);
@@ -64,7 +72,6 @@ export function useAccess() {
   }
 
   async function getAuditLogs(patientDID: string) {
-    console.log("queryLogs patientDID:", patientDID);
     if (!contracts) return [];
     const contract = await contracts.getAuditLog();
     return contract.queryLogs(patientDID);

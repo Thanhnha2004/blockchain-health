@@ -19,6 +19,7 @@ export default function UploadRecord({ patientDID }: Props) {
   const [result, setResult] = useState<{
     ipfsCID: string;
     txHash: string;
+    key: string;
   } | null>(null);
 
   async function handleUpload(e: React.FormEvent) {
@@ -46,7 +47,7 @@ export default function UploadRecord({ patientDID }: Props) {
       }
 
       const data = await res.json();
-      setResult({ ipfsCID: data.ipfsCID, txHash: data.txHash });
+      setResult({ ipfsCID: data.ipfsCID, txHash: data.txHash, key: data.key });
       setFile(null);
     } catch (err: any) {
       setError(err.message);
@@ -129,6 +130,9 @@ export default function UploadRecord({ patientDID }: Props) {
             </p>
             <p className="text-xs text-emerald-600 break-all mt-1">
               Tx: {result.txHash}
+            </p>
+            <p className="text-xs text-emerald-600 break-all mt-1">
+              Key: {result.key}
             </p>
           </div>
         )}

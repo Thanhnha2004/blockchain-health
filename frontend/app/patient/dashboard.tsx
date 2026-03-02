@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useContracts } from "../../hooks/useContracts";
+import ViewRecord from "./view-record";
 
 interface Record {
   ipfsCID: string;
@@ -27,35 +28,15 @@ export default function DashboardPage({ patientDID }: Props) {
   const [records, setRecords] = useState<Record[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewing, setViewing] = useState<Record | null>(null);
 
   useEffect(() => {
-    console.log("patientDID:", patientDID);
-    if (!contracts) {
-      console.log("no contracts");
-      return;
-    }
-
     if (!contracts) return;
 
     contracts
       .getRecordRegistry()
-      .then((c) => {
-        console.log("contract address:", c.target);
-        return c.getRecords(patientDID);
-      })
-      .then((r) => {
-        console.log("records:", r);
-        setRecords(r);
-      })
-      .catch((e) => {
-        console.error("error:", e);
-        setError(e.message);
-      });
-
-    contracts
-      .getRecordRegistry()
       .then((c) => c.getRecords(patientDID))
-      .then(setRecords)
+      .then((r) => setRecords([...r]))
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
   }, [contracts, patientDID]);
@@ -78,7 +59,7 @@ export default function DashboardPage({ patientDID }: Props) {
     );
 
   return (
-    <div>
+    <>
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-lg font-bold text-slate-200">
           Your Records
@@ -90,14 +71,32 @@ export default function DashboardPage({ patientDID }: Props) {
 
       <div className="flex flex-col gap-3">
         {records.map((record, i) => (
-          <RecordCard key={i} record={record} />
+          <RecordCard
+            key={i}
+            record={record}
+            onView={() => setViewing(record)}
+          />
         ))}
       </div>
-    </div>
+
+      {viewing && (
+        <ViewRecord
+          record={viewing}
+          patientDID={patientDID}
+          onClose={() => setViewing(null)}
+        />
+      )}
+    </>
   );
 }
 
-function RecordCard({ record }: { record: Record }) {
+function RecordCard({
+  record,
+  onView,
+}: {
+  record: Record;
+  onView: () => void;
+}) {
   const colorClass = TYPE_COLORS[record.recordType] ?? TYPE_COLORS.note;
   const date = new Date(Number(record.createdAt) * 1000);
 
@@ -114,17 +113,21 @@ function RecordCard({ record }: { record: Record }) {
               {date.toLocaleDateString()} {date.toLocaleTimeString()}
             </span>
           </div>
-
           <p className="text-xs text-slate-500 mb-1">IPFS CID</p>
           <p className="text-sm text-slate-300 font-mono truncate">
             {record.ipfsCID}
           </p>
-
           <p className="text-xs text-slate-500 mt-2 mb-1">Created by</p>
           <p className="text-xs text-slate-400 font-mono truncate">
             {record.createdBy}
           </p>
         </div>
+
+        <button
+          onClick={onView}
+          className="flex-shrink-0 border border-slate-700 hover:border-emerald-600 text-slate-400 hover:text-emerald-400 text-xs uppercase tracking-widest px-3 py-2 rounded-lg transition-colors">
+          View
+        </button>
       </div>
     </div>
   );
